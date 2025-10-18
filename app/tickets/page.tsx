@@ -12,16 +12,13 @@ export default function TicketsPage() {
   const router = useRouter()
   const role = (user.role || "").toUpperCase()
   const [tickets, setTickets] = useState<any[]>([])
-  const [customers, setCustomers] = useState<any[]>([])
 
   useEffect(() => {
     ;(async () => {
       try {
-        const [t, c] = await Promise.all([fetch("/api/tickets"), fetch("/api/customers?q=")])
+        const t = await fetch("/api/tickets")
         const tj = await t.json()
-        const cj = await c.json()
         setTickets(tj.items || [])
-        setCustomers(cj.items || [])
       } catch {}
     })()
   }, [])
@@ -41,16 +38,9 @@ export default function TicketsPage() {
   function renderCustomer(t: any) {
     if (t.customer) {
       const c = t.customer
-      return `${c.pusat || ""}${c.cabang ? " - " + c.cabang : ""}${c.daerah ? " (" + c.daerah + ")" : ""}${
+      return `${c.company || ""}${c.branch ? " - " + c.branch : ""}${c.region ? " (" + c.region + ")" : ""}${
         c.sid ? " • " + c.sid : ""
       }`
-    }
-    if (t.customerId) {
-      const c = customers.find((x) => x.id === t.customerId)
-      if (c)
-        return `${c.company || c.pusat || ""}${c.branch || c.cabang ? " - " + (c.branch || c.cabang) : ""}${
-          c.region || c.daerah ? " (" + (c.region || c.daerah) + ")" : ""
-        }${c.sid ? " • " + c.sid : ""}`
     }
     return "-"
   }

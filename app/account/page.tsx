@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth-context"
+import { BackButton } from "@/components/back-button"
 
 type Activity = { id: string; time: string; action: string; detail?: string }
 type Device = { id: string; name: string; ip?: string; lastSeen: string }
@@ -11,7 +12,7 @@ export default function AccountSecurityPage() {
   const [password, setPassword] = useState("")
   const [activities, setActivities] = useState<Activity[]>([])
   const [devices, setDevices] = useState<Device[]>([])
-  const { role, user } = useAuth()
+  const { user } = useAuth()
 
   useEffect(() => {
     // stub sample data
@@ -29,8 +30,11 @@ export default function AccountSecurityPage() {
   return (
     <main className="p-4 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Akun & Keamanan</h1>
-        <span className="text-sm rounded-md border px-2 py-1">Role Anda: {role}</span>
+        <div className="flex items-center gap-2">
+          <BackButton />
+          <h1 className="text-xl font-semibold">Akun & Keamanan</h1>
+        </div>
+        <span className="text-sm rounded-md border px-2 py-1">Role Anda: {user?.role || "-"}</span>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
