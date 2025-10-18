@@ -36,8 +36,7 @@ export default function EditTicketPage() {
   const isManager = role === "MANAGER"
   const isNoc = role === "NOC"
 
-  // Only NOC and SUPER_ADMIN can edit; MANAGER is read-only in edit page
-  const readOnly = isManager
+  const readOnly = isManager || (isNoc && ticket?.status !== "OPEN")
 
   useEffect(() => {
     let mounted = true
