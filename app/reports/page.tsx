@@ -45,37 +45,77 @@ export default function ReportsPage() {
   }, [])
 
   async function exportPDF() {
-    const { jsPDF } = await import("jspdf")
-    await import("jspdf-autotable")
-    const doc = new jsPDF()
+    try {
+      const html2pdf = (await import("html2pdf.js")).default
 
-    // Header
-    doc.setFontSize(14)
-    doc.text("Laporan Tickets", 14, 16)
-    ;(doc as any).autoTable({
-      startY: 20,
-      head: [["No Ticket", "Customer", "Status"]],
-      body: tickets.map((r) => [
-        r.ticketNo,
-        `${r.customer?.company || "-"} - ${r.customer?.branch || "-"} (${r.customer?.region || "-"})`,
-        r.status,
-      ]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [3, 105, 161] },
-    })
+      const element = document.createElement("div")
+      element.innerHTML = `
+        <h2 style="font-size: 18px; margin-bottom: 10px;">Laporan Tickets</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+          <thead>
+            <tr style="background-color: #036fa1; color: white;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">No Ticket</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Customer</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tickets
+              .map(
+                (r) => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.ticketNo}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.customer?.company || "-"} - ${r.customer?.branch || "-"} (${r.customer?.region || "-"})</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.status}</td>
+              </tr>
+            `,
+              )
+              .join("")}
+          </tbody>
+        </table>
 
-    const y = (doc as any).lastAutoTable.finalY + 10
-    doc.setFontSize(14)
-    doc.text("Laporan Customers", 14, y)
-    ;(doc as any).autoTable({
-      startY: y + 4,
-      head: [["Pusat", "Cabang", "Daerah", "SID", "ISP"]],
-      body: customers.map((r) => [r.company, r.branch || "-", r.region || "-", r.sid || "-", r.isp || "-"]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [3, 105, 161] },
-    })
+        <h2 style="font-size: 18px; margin-bottom: 10px;">Laporan Customers</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #036fa1; color: white;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Pusat</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Cabang</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Daerah</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">SID</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">ISP</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${customers
+              .map(
+                (r) => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.company}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.branch || "-"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.region || "-"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.sid || "-"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${r.isp || "-"}</td>
+              </tr>
+            `,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `
 
-    doc.save("report-mosaik.pdf")
+      const opt = {
+        margin: 10,
+        filename: "report-mosaik.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
+      }
+
+      html2pdf().set(opt).from(element).save()
+    } catch (e) {
+      console.error("[v0] PDF export failed:", e)
+      alert("PDF export gagal. Gunakan CSV export sebagai alternatif.")
+    }
   }
 
   function exportCSV() {
