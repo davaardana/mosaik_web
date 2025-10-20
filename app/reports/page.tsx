@@ -3,18 +3,47 @@
 import AppShell from "@/components/app-shell"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+import { BackButton } from "@/components/back-button"
 
-const ticketRows = [
-  { number: "20251015-001", customer: "PT Alpha - Cabang A (Jakarta)", status: "OPEN" },
-  { number: "20251015-002", customer: "PT Alpha - Cabang B (Bandung)", status: "RESOLVED" },
-]
+type Ticket = {
+  id: string
+  ticketNo: string
+  customer?: { company: string; branch?: string; region?: string; sid?: string }
+  status: string
+}
 
-const customerRows = [
-  { pusat: "PT Alpha", cabang: "Cabang A", daerah: "Jakarta", sid: "SID-001", isp: "Indibiz" },
-  { pusat: "PT Alpha", cabang: "Cabang B", daerah: "Bandung", sid: "SID-002", isp: "Biznet" },
-]
+type Customer = {
+  id: string
+  company: string
+  branch?: string
+  region?: string
+  sid?: string
+  isp?: string
+}
 
 export default function ReportsPage() {
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [tRes, cRes] = await Promise.all([fetch("/api/tickets"), fetch("/api/customers")])
+        const tData = await tRes.json()
+        const cData = await cRes.json()
+        setTickets(tData.items || [])
+        setCustomers(cData.items || [])
+      } catch (e) {
+        console.error("[v0] Failed to load reports:", e)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
   async function exportPDF() {
     const { jsPDF } = await import("jspdf")
     await import("jspdf-autotable")
@@ -26,9 +55,13 @@ export default function ReportsPage() {
     ;(doc as any).autoTable({
       startY: 20,
       head: [["No Ticket", "Customer", "Status"]],
-      body: ticketRows.map((r) => [r.number, r.customer, r.status]),
+      body: tickets.map((r) => [
+        r.ticketNo,
+        `${r.customer?.company || "-"} - ${r.customer?.branch || "-"} (${r.customer?.region || "-"})`,
+        r.status,
+      ]),
       styles: { fontSize: 9 },
-      headStyles: { fillColor: [3, 105, 161] }, // teal-ish
+      headStyles: { fillColor: [3, 105, 161] },
     })
 
     const y = (doc as any).lastAutoTable.finalY + 10
@@ -37,7 +70,7 @@ export default function ReportsPage() {
     ;(doc as any).autoTable({
       startY: y + 4,
       head: [["Pusat", "Cabang", "Daerah", "SID", "ISP"]],
-      body: customerRows.map((r) => [r.pusat, r.cabang, r.daerah, r.sid, r.isp]),
+      body: customers.map((r) => [r.company, r.branch || "-", r.region || "-", r.sid || "-", r.isp || "-"]),
       styles: { fontSize: 9 },
       headStyles: { fillColor: [3, 105, 161] },
     })
@@ -48,10 +81,14 @@ export default function ReportsPage() {
   function exportCSV() {
     const lines = [
       ["No Ticket", "Customer", "Status"],
-      ...ticketRows.map((r) => [r.number, r.customer, r.status]),
+      ...tickets.map((r) => [
+        r.ticketNo,
+        `${r.customer?.company || "-"} - ${r.customer?.branch || "-"} (${r.customer?.region || "-"})`,
+        r.status,
+      ]),
       [],
       ["Pusat", "Cabang", "Daerah", "SID", "ISP"],
-      ...customerRows.map((r) => [r.pusat, r.cabang, r.daerah, r.sid, r.isp]),
+      ...customers.map((r) => [r.company, r.branch || "-", r.region || "-", r.sid || "-", r.isp || "-"]),
     ]
     const csv = lines.map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n")
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
@@ -63,8 +100,19 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url)
   }
 
+  if (loading)
+    return (
+      <AppShell>
+        <div>Loading...</div>
+      </AppShell>
+    )
+
   return (
     <AppShell>
+      <div className="mb-4 flex items-center gap-2">
+        <BackButton />
+        <h1 className="text-xl font-semibold">Report & Analysis</h1>
+      </div>
       <Card>
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Report & Analysis</CardTitle>
@@ -77,7 +125,7 @@ export default function ReportsPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <section>
-            <h3 className="font-semibold mb-2">Tickets</h3>
+            <h3 className="font-semibold mb-2">Tickets ({tickets.length})</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-muted/40">
@@ -88,10 +136,12 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ticketRows.map((r) => (
-                    <tr key={r.number} className="border-t">
-                      <td className="px-3 py-2">{r.number}</td>
-                      <td className="px-3 py-2">{r.customer}</td>
+                  {tickets.map((r) => (
+                    <tr key={r.id} className="border-t">
+                      <td className="px-3 py-2">{r.ticketNo}</td>
+                      <td className="px-3 py-2">
+                        {r.customer?.company} - {r.customer?.branch} ({r.customer?.region})
+                      </td>
                       <td className="px-3 py-2">{r.status}</td>
                     </tr>
                   ))}
@@ -101,7 +151,7 @@ export default function ReportsPage() {
           </section>
 
           <section>
-            <h3 className="font-semibold mb-2">Customers</h3>
+            <h3 className="font-semibold mb-2">Customers ({customers.length})</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-muted/40">
@@ -114,13 +164,13 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {customerRows.map((r) => (
-                    <tr key={`${r.pusat}-${r.cabang}`}>
-                      <td className="px-3 py-2">{r.pusat}</td>
-                      <td className="px-3 py-2">{r.cabang}</td>
-                      <td className="px-3 py-2">{r.daerah}</td>
-                      <td className="px-3 py-2">{r.sid}</td>
-                      <td className="px-3 py-2">{r.isp}</td>
+                  {customers.map((r) => (
+                    <tr key={r.id} className="border-t">
+                      <td className="px-3 py-2">{r.company}</td>
+                      <td className="px-3 py-2">{r.branch || "-"}</td>
+                      <td className="px-3 py-2">{r.region || "-"}</td>
+                      <td className="px-3 py-2">{r.sid || "-"}</td>
+                      <td className="px-3 py-2">{r.isp || "-"}</td>
                     </tr>
                   ))}
                 </tbody>

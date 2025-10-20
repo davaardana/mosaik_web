@@ -27,8 +27,8 @@ function generateTicketNumber() {
   const yyyy = d.getFullYear()
   const mm = String(d.getMonth() + 1).padStart(2, "0")
   const dd = String(d.getDate()).padStart(2, "0")
-  const seq = Math.floor(Math.random() * 900 + 100) // contoh urutan
-  return `T-${yyyy}${mm}${dd}-${seq}`
+  const seq = String(Math.floor(Math.random() * 900000 + 100000)).padStart(6, "0")
+  return `MIS-${yyyy}${mm}${dd}-Notiket(${seq})`
 }
 
 export default function NewTicketPage() {

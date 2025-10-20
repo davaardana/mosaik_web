@@ -331,5 +331,6 @@ export function genTicketNo() {
   const d = new Date()
   const ymd = `${d.getFullYear()}${`${d.getMonth() + 1}`.padStart(2, "0")}${`${d.getDate()}`.padStart(2, "0")}`
   db.seq += 1
-  return `${ymd}-${`${db.seq}`.padStart(3, "0")}`
+  const seq = `${db.seq}`.padStart(6, "0")
+  return `MIS-${ymd}-Notiket(${seq})`
 }
