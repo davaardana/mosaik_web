@@ -32,20 +32,19 @@ function generateTicketNumber() {
 }
 
 export default function NewTicketPage() {
-  const { user, gate } = useAuth() // get gate from Auth
+  const { user, gate } = useAuth()
   const router = useRouter()
   const [q, setQ] = useState("")
   const [status, setStatus] = useState("New")
   const [images, setImages] = useState<File[]>([])
   const [custList, setCustList] = useState<Customer[]>([])
-  const [lokasi, setLokasi] = useState("")
   const [problem, setProblem] = useState("")
   const [solusi, setSolusi] = useState("")
   const [selected, setSelected] = useState<Customer | null>(null)
   const noTicket = useMemo(() => generateTicketNumber(), [])
 
   const role = (user.role || "").toUpperCase() as "SUPER_ADMIN" | "MANAGER" | "NOC"
-  const gateOpen = gate.isOpen // use actual gate state
+  const gateOpen = gate.isOpen
   const readOnly = role === "NOC" ? !gateOpen : false
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export default function NewTicketPage() {
 
   async function saveTicket() {
     if (role === "NOC" && !gateOpen) return
-    const statusApi = status === "New" ? "OPEN" : status === "In Progress" ? "IN_PROGRESS" : "CLOSED" // Resolved/Closed -> CLOSED
+    const statusApi = status === "New" ? "OPEN" : status === "In Progress" ? "IN_PROGRESS" : "CLOSED"
     const payload = {
       ticketNo: noTicket,
       customerId: selected?.id || "",
@@ -86,7 +85,6 @@ export default function NewTicketPage() {
           }
         : null,
       problem,
-      location: lokasi,
       status: statusApi,
       openedBy: `${user.role}:${user.name}`,
     }
@@ -102,8 +100,6 @@ export default function NewTicketPage() {
     }
     router.push("/tickets")
   }
-
-  console.log("[v0] NewTicket role:", role, "gateOpen:", gateOpen, "readOnly:", readOnly)
 
   return (
     <AppShell>
@@ -153,7 +149,6 @@ export default function NewTicketPage() {
                       className="w-full text-left p-2 text-sm hover:bg-muted"
                       onClick={() => {
                         setSelected(c)
-                        setLokasi(c.region || "")
                         setQ(
                           `${c.company} - ${c.branch ?? ""} (${c.region ?? "-"}) ${c.sid ? "• " + c.sid : ""}`.trim(),
                         )
@@ -174,8 +169,8 @@ export default function NewTicketPage() {
             </div>
           </div>
 
-          <div className="grid gap-2 md:grid-cols-3">
-            <div className="grid gap-1 md:col-span-2">
+          <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid gap-1">
               <Label>Problem / Masalah</Label>
               <Textarea
                 placeholder="Jelaskan masalahnya"
@@ -185,19 +180,8 @@ export default function NewTicketPage() {
                 readOnly={readOnly}
               />
             </div>
-            <div className="grid gap-1">
-              <Label>Lokasi Trouble (nama daerah)</Label>
-              <Input
-                placeholder="Contoh: Jakarta"
-                value={lokasi}
-                onChange={(e) => setLokasi(e.target.value)}
-                readOnly={readOnly}
-              />
-            </div>
-          </div>
 
-          <div className="grid gap-2 md:grid-cols-3">
-            <div className="grid gap-1 md:col-span-2">
+            <div className="grid gap-1">
               <Label>Tindakan yang Diambil (solusi)</Label>
               <Textarea
                 placeholder="Langkah atau solusi yang dilakukan"
@@ -207,7 +191,9 @@ export default function NewTicketPage() {
                 readOnly={readOnly}
               />
             </div>
+          </div>
 
+          <div className="grid gap-2 md:grid-cols-2">
             <div className="grid gap-1">
               <Label>Status Ticket</Label>
               <Select value={status} onValueChange={setStatus} disabled={readOnly}>
@@ -222,37 +208,30 @@ export default function NewTicketPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="grid gap-1">
+              <Label>Kirim Foto (Max 5 foto - PNG, JPG)</Label>
+              <Input type="file" accept="image/png,image/jpeg" multiple onChange={onFiles} disabled={readOnly} />
+            </div>
           </div>
 
-          <div className="grid gap-1">
-            <Label>Kirim Foto (Max 5 foto - PNG, JPG)</Label>
-            <Input type="file" accept="image/png,image/jpeg" multiple onChange={onFiles} disabled={readOnly} />
-            <div className="mt-2 flex flex-wrap gap-2">
-              {images.map((f, idx) => (
-                <div key={idx} className="text-xs rounded border px-2 py-1 bg-secondary">
-                  {f.name}
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {images.map((f, idx) => (
+              <div key={idx} className="text-xs rounded border px-2 py-1 bg-secondary">
+                {f.name}
+              </div>
+            ))}
           </div>
 
           <div className="flex justify-end gap-2">
             <Button variant="secondary" type="button" onClick={() => router.back()}>
               Batal
             </Button>
-            <Button
-              type="button"
-              disabled={role === "NOC" && !gateOpen}
-              onClick={saveTicket} // save to API
-            >
+            <Button type="button" disabled={role === "NOC" && !gateOpen} onClick={saveTicket}>
               Simpan Ticket
             </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Catatan & Waktu Mulai/Berakhir/Downtime telah dihilangkan sesuai brief. Lokasi & saran tidak terintegrasi
-            maps.
-          </p>
           <p className="text-xs text-muted-foreground">
             Login: {user.name} • Role: {user.role}
           </p>

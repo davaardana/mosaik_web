@@ -96,18 +96,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const can = useMemo(() => {
     return (perm: "viewTickets" | "createTicket" | "edit") => {
       if (user.role === "SUPER_ADMIN") return true
-      if (perm === "createTicket") return user.role === "MANAGER" // NOC tidak create
-      if (perm === "edit") {
-        // NOC boleh edit hanya saat gate terbuka; Manager tidak boleh edit
-        return user.role === "NOC" && gate.isOpen
-      }
+
+      if (perm === "createTicket") return user.role === "MANAGER"
+
+      if (perm === "edit") return user.role === "NOC"
+
       if (perm === "viewTickets") {
-        // NOC hanya boleh melihat saat gate terbuka; Manager selalu boleh
-        return user.role === "MANAGER" || gate.isOpen
+        return user.role === "MANAGER" || user.role === "NOC"
       }
       return false
     }
-  }, [user, gate.isOpen])
+  }, [user])
 
   const value = useMemo(() => ({ user, setUser, logout, can, gate }), [user, can, gate])
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
