@@ -5,10 +5,10 @@ export function MosaikLogo({ size = 28 }: { size?: number }) {
     <Image
       src="/images/logomosaik.png"
       alt="Logo PT. Mosaik Integrasi Solusindo"
-      width={size}
+      width={size * 3}
       height={size}
       priority
-      className="dark:invert-0 invert"
+      className="h-auto w-auto"
     />
   )
 }
