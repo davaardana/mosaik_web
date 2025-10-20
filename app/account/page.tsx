@@ -34,13 +34,13 @@ export default function AccountSecurityPage() {
           <BackButton />
           <h1 className="text-xl font-semibold">Akun & Keamanan</h1>
         </div>
-        <span className="text-sm rounded-md border px-2 py-1">Role Anda: {user?.role || "-"}</span>
+        <span className="text-sm rounded-md border px-2 py-1">Role Anda: {user?.role || "MANAGER"}</span>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
         <div className="rounded-md border p-4 space-y-2">
           <h2 className="font-medium">Informasi Akun</h2>
-          <div className="text-sm">Nama: {user?.name || "-"}</div>
+          <div className="text-sm">Nama: {user?.name || "Guest"}</div>
           <div className="text-sm">Email: {user?.email || "-"}</div>
           <div className="text-sm">
             Password: <span className="font-mono">{showPassword ? password || "-" : "********"}</span>

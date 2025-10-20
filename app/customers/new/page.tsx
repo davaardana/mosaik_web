@@ -5,15 +5,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/components/auth-context"
 import { useState } from "react"
 import { BackButton } from "@/components/back-button"
 import { useRouter } from "next/navigation"
 
 export default function AddCustomerPage() {
-  const { can } = useAuth()
   const router = useRouter()
-  const readOnly = !can("edit")
   const [sid, setSid] = useState("")
 
   return (
@@ -29,28 +26,23 @@ export default function AddCustomerPage() {
         <CardContent className="grid gap-4">
           <div className="grid gap-1">
             <Label>Customer Name</Label>
-            <Input placeholder="Cari pusat, tampilkan cabang & daerah atau berdasarkan SID" readOnly={readOnly} />
+            <Input placeholder="Cari pusat, tampilkan cabang & daerah atau berdasarkan SID" />
           </div>
 
           <div className="grid gap-2 md:grid-cols-2">
             <div className="grid gap-1">
               <Label>Phone/Whatsapp</Label>
-              <Input placeholder="08xxx / +62xxx" readOnly={readOnly} />
+              <Input placeholder="08xxx / +62xxx" />
             </div>
             <div className="grid gap-1">
               <Label>Alamat (tanpa maps)</Label>
-              <Textarea placeholder="Alamat lengkap" className="min-h-24" readOnly={readOnly} />
+              <Textarea placeholder="Alamat lengkap" className="min-h-24" />
             </div>
           </div>
 
           <div className="grid gap-1">
             <Label>SID</Label>
-            <Input
-              placeholder="Contoh: 1524317xxxxx / S00xxxx"
-              value={sid}
-              onChange={(e) => setSid(e.target.value)}
-              readOnly={readOnly}
-            />
+            <Input placeholder="Contoh: 1524317xxxxx / S00xxxx" value={sid} onChange={(e) => setSid(e.target.value)} />
           </div>
 
           <p className="text-xs text-muted-foreground">Email tidak wajib diisi dan dihilangkan sesuai brief.</p>
@@ -61,7 +53,6 @@ export default function AddCustomerPage() {
             </Button>
             <Button
               type="button"
-              disabled={readOnly}
               onClick={async () => {
                 try {
                   const raw = localStorage.getItem("mosaik:customers")
@@ -94,6 +85,7 @@ export default function AddCustomerPage() {
                     }),
                   })
                   alert("Customer disimpan")
+                  router.back()
                 } catch (e) {
                   alert("Gagal menyimpan customer")
                 }

@@ -44,8 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const raw = localStorage.getItem("mosaik_user")
     if (raw) {
-      const parsed = JSON.parse(raw)
-      setUserState({ ...parsed, role: normalizeRole(parsed.role) })
+      try {
+        const parsed = JSON.parse(raw)
+        setUserState({
+          name: parsed.name || "Guest",
+          role: normalizeRole(parsed.role),
+          email: parsed.email,
+        })
+      } catch (e) {
+        console.error("[v0] Failed to parse user from localStorage:", e)
+      }
     }
   }, [])
 
