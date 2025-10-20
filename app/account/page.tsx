@@ -1,8 +1,11 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
+
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth-context"
 import { BackButton } from "@/components/back-button"
+import Link from "next/link"
 
 type Activity = { id: string; time: string; action: string; detail?: string }
 type Device = { id: string; name: string; ip?: string; lastSeen: string }
@@ -42,21 +45,10 @@ export default function AccountSecurityPage() {
           <h2 className="font-medium">Informasi Akun</h2>
           <div className="text-sm">Nama: {user?.name || "Guest"}</div>
           <div className="text-sm">Email: {user?.email || "-"}</div>
-          <div className="text-sm">
-            Password: <span className="font-mono">{showPassword ? password || "-" : "********"}</span>
-            <button onClick={() => setShowPassword((s) => !s)} className="ml-2 text-xs underline">
-              {showPassword ? "Sembunyikan" : "Tampilkan"}
-            </button>
-          </div>
-          <div className="space-y-1">
-            <label className="text-sm">Ubah Sandi (tanpa autentikasi tambahan)</label>
-            <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <div className="text-xs text-muted-foreground">Perubahan disimpan lokal untuk demo.</div>
-          </div>
+          <div className="text-sm">Role: {user?.role || "MANAGER"}</div>
+          <Button asChild className="mt-4">
+            <Link href="/account/change-password">Ubah Sandi</Link>
+          </Button>
         </div>
 
         <div className="rounded-md border p-4 space-y-2">

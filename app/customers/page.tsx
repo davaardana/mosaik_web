@@ -7,12 +7,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/back-button"
+import { useAuth } from "@/components/auth-context"
 
 const fetcher = (url: string) => fetch(url, { cache: "no-store" }).then((r) => r.json())
 
 export default function CustomersPage() {
+  const { user } = useAuth()
   const { data } = useSWR("/api/customers?q=", fetcher)
   const rows = useMemo(() => (data?.items as any[]) || [], [data])
+  const canEdit = user?.role === "MANAGER" || user?.role === "SUPER_ADMIN"
 
   return (
     <AppShell>
@@ -41,6 +44,7 @@ export default function CustomersPage() {
                 <TableHead>SID</TableHead>
                 <TableHead>ISP</TableHead>
                 <TableHead>Bandwidth</TableHead>
+                {canEdit && <TableHead>Aksi</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -57,6 +61,13 @@ export default function CustomersPage() {
                     <TableCell>{c.sid || "-"}</TableCell>
                     <TableCell>{c.isp || "-"}</TableCell>
                     <TableCell>{c.bandwidth || "-"}</TableCell>
+                    {canEdit && (
+                      <TableCell>
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/customers/${c.id}/edit`}>Edit</Link>
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 )
               })}
