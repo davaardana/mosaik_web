@@ -49,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserState({
           name: parsed.name || "Guest",
           role: normalizeRole(parsed.role),
-          email: parsed.email,
         })
       } catch (e) {
         console.error("[v0] Failed to parse user from localStorage:", e)
