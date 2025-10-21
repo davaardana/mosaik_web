@@ -4,7 +4,6 @@ import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { MosaikLogo } from "@/components/mosaik-logo"
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -17,7 +16,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="border-b bg-card">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <MosaikLogo size={28} />
             <span className="font-semibold text-sm md:text-base">Mosaik Ticketing System</span>
           </div>
           <nav className="flex items-center gap-2">

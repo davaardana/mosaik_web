@@ -31,7 +31,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-3">
             <MosaikLogo size={36} />
-            <div className="font-semibold text-balance">Mosaik Ticketing System</div>
           </div>
           <ThemeToggle />
         </div>
