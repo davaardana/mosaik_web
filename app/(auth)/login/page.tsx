@@ -24,7 +24,9 @@ export default function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSubmitting(true)
-    setUser({ name: username || "User", role })
+    const userData = { name: username || "User", role }
+    console.log("[v0] Login with role:", userData)
+    setUser(userData)
     router.replace("/dashboard")
   }
 

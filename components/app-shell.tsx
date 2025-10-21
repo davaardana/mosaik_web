@@ -9,7 +9,6 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "./auth-context"
 import { MosaikLogo } from "./mosaik-logo"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
 
 const navItems = [
@@ -61,17 +60,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <span className="font-medium text-foreground">
             {user.name} ({user.role})
           </span>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setUser({ name: "Super Admin", role: "SUPER_ADMIN" })}>
-              Super Admin
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => setUser({ name: "Manager", role: "MANAGER" })}>
-              Manager
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => setUser({ name: "NOC", role: "NOC" })}>
-              NOC
-            </Button>
-          </div>
           <div className="mt-3">
             <LogoutButton icon={<Icon name="logout" />} />
           </div>
