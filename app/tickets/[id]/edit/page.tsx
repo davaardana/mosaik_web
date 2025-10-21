@@ -36,7 +36,7 @@ export default function EditTicketPage() {
   const isManager = role === "MANAGER"
   const isNoc = role === "NOC"
 
-  const readOnly = isManager || (isNoc && ticket?.status !== "OPEN")
+  const readOnly = isManager
 
   useEffect(() => {
     let mounted = true
